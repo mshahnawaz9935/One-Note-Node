@@ -3,7 +3,7 @@ var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var config = require('./config');
 var _ = require('underscore');
-
+var request = require('request');
 var oneNotePagesApiUrl = 'https://www.onenote.com/api/v1.0/pages';
 
 
@@ -39,6 +39,7 @@ app.get('/', function(req, res,next){
 });
 
 app.get('/callback', function(req, res,next){
+     
     var code = req.query.code;
 
 
@@ -53,45 +54,49 @@ app.get('/callback', function(req, res,next){
           console.log(results);
           res.end(JSON.stringify(results));
         } else {
-          token = access_token;
+            writetonote(access_token);
           res.end('Signed in ');
         }
       });
+});
 
-       this.createPageWithSimpleText = function(token, callback) {
-      var htmlPayload =
+function writetonote(token)
+{
+    var htmlPayload =
         "<!DOCTYPE html>" +
         "<html>" +
         "<head>" +
-        "    <title>TASK MANAGEMENT</title>" +
+        "    <title>TASK1 MANAGEMENT</title>" +
         "    <meta name=\"created\" content=\"" + dateTimeNowISO() + "\">" +
         "</head>" +
         "<body>" +
         "    <p>TASK MANAGEMENT <i>formatted</i></p>" +
-        "    <b>test task mamangement</b></p>" +
+        "    <b>test task management</b></p>" +
         "</body>" +
         "</html>";
+      createPage(token, htmlPayload, false);
 
-      createPage(token, htmlPayload, false, callback);
-    };
+}
 
 
+function dateTimeNowISO() {
+      return new Date().toISOString();
+    }
 
-});
-
-    function createPage(accessToken, payload, multipart, callback) {
+    function createPage(accessToken, payload, multipart) {
       var options = {
         url: oneNotePagesApiUrl,
         headers: {
           'Authorization': 'Bearer ' + accessToken
         }
       };
+      console.log(accessToken , payload);
       // Build simple request
       if (!multipart) {
         options.headers['Content-Type'] = 'text/html';
         options.body = payload;
       }
-      var r = request.post(options, callback);
+      var r = request.post(options);
       // Build multi-part request
       if (multipart) {
         var CRLF = '\r\n';
