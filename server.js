@@ -22,6 +22,64 @@ var port = process.env.PORT || 3000;        // set our port
       'grant_type': config.grant_type
     }
 
+var url = '';
+var topic = 'lava';
+var chapter = 'Volcanoes';
+var queryObject =  {
+   "userID":"IOK_Postman_Testing",
+   "parameters":{
+        "parameterInstance":[
+            {"name":"complexity","value":5},
+            {"name":"duration","value":4}, 
+            {"name":"topic","value":topic},
+            {"name":"chapter","value":chapter}
+          ]
+       }
+} ;
+var favourites = {};
+request({
+    url: "http://kdeg-vm-43.scss.tcd.ie/ALMANAC_Personalised_Composition_Service/composer/atomiccompose",
+    method: "POST",
+    json: true,   // <--Very important!!!
+    body: queryObject,
+     headers: {
+        "content-type": "application/json",  // <--Very important!!!
+    },
+}, function (error, response, body){
+
+    console.log("post query" + response.body);
+      favourites = response.body;
+      console.log(favourites.sections.section.length);
+       for(var i=0; i< favourites.sections.section.length; i++) 
+       {  
+            url = url + " <h3>Images from section "+ (i+1) + " are as under</h3>";
+            url = url + "<h4>" +  favourites.sections.section[i].text.text + "</h4>";
+            var image_len = favourites.sections.section[i].images.image.length;
+            for(var j=0; j< image_len;j++)
+            {
+              url = url+ "<p><img src=" + "\"" + favourites.sections.section[i].images.image[j].url + "\"" + "/></p>";
+              console.log(url);
+            }
+
+
+           }
+      
+
+
+      var htmlPayload =
+        "<!DOCTYPE html>" +
+        "<html>" +
+        "<head>" +
+        "    <title> "+ favourites.title + "</title>" +
+        "    <meta name=\"created\" content=\"" + dateTimeNowISO() + "\">" +
+        "</head>" +
+        "<body>" +
+        "    <p>" + favourites.title   + " <i>formatted</i></p>" + 
+        "    <b>test task management</b></p>" +
+        "</body>" +
+        "</html>";
+});
+
 
 app.get('/', function(req, res,next){
  
@@ -62,16 +120,18 @@ app.get('/callback', function(req, res,next){
 
 function writetonote(token)
 {
+  
+
     var htmlPayload =
         "<!DOCTYPE html>" +
         "<html>" +
         "<head>" +
-        "    <title>TASK1 MANAGEMENT</title>" +
+        "    <title>"+ favourites.title +"</title>" +
         "    <meta name=\"created\" content=\"" + dateTimeNowISO() + "\">" +
         "</head>" +
         "<body>" +
-        "    <p>TASK MANAGEMENT <i>formatted</i></p>" +
-        "    <b>test task management</b></p>" +
+        "    <p> View Your Page <i>formatted</i></p>" +
+         url +
         "</body>" +
         "</html>";
       createPage(token, htmlPayload, false);
